@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	allowedKinds  = []nostr.Kind{9802, 1, 1111, 11, 1244, 1222, 30818, 20, 21, 22, 30023, 9735, 9321}
+	allowedKinds  = []nostr.Kind{9802, 1, 1111, 11, 1244, 1222, 30818, 20, 21, 22, 30023, 9735, 9321, 30040, 30041}
 	moneyKinds    = []nostr.Kind{9735, 9321}
 	secretKinds   = []nostr.Kind{1059}
 	aggregatedWoT WotXorFilter
