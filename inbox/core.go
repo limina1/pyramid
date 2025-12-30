@@ -113,7 +113,7 @@ func rejectEvent(ctx context.Context, evt nostr.Event) (bool, string) {
 	}
 
 	// here are normal mentions
-	if !slices.Contains(global.Settings.Inbox.AllowedKinds, evt.Kind) {
+	if !slices.Contains(global.GetAllowedKinds(global.Settings.Inbox.AllowedKinds), evt.Kind) {
 		return true, "blocked: event kind not allowed"
 	}
 

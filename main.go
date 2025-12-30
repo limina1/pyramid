@@ -230,7 +230,7 @@ func main() {
 			return policies.SeqEvent(
 				policies.PreventTooManyIndexableTags(9, []nostr.Kind{3}, nil),
 				policies.PreventTooManyIndexableTags(1200, nil, []nostr.Kind{3}),
-				policies.RestrictToSpecifiedKinds(true, supportedKinds...),
+				policies.RestrictToSpecifiedKinds(true, global.Settings.AllowedKinds...),
 				policies.RejectUnprefixedNostrReferences,
 				basicRejectionLogic,
 			)(ctx, event)

@@ -1,6 +1,7 @@
 package global
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -54,13 +55,18 @@ type UserSettings struct {
 
 	BlockedIPs []string `json:"blocked_ips"`
 
+	// global allowed kinds (used as default for all relays)
+	AllowedKinds []nostr.Kind `json:"allowed_kinds"`
+
 	// per-relay
 	Internal struct {
 		RelayMetadata
+		AllowedKinds []nostr.Kind `json:"allowed_kinds"`
 	} `json:"internal"`
 
 	Favorites struct {
 		RelayMetadata
+		AllowedKinds []nostr.Kind `json:"allowed_kinds"`
 	} `json:"favorites"`
 
 	Inbox struct {
@@ -91,7 +97,8 @@ type UserSettings struct {
 
 	Moderated struct {
 		RelayMetadata
-		MinPoW uint `json:"min_pow"`
+		MinPoW       uint         `json:"min_pow"`
+		AllowedKinds []nostr.Kind `json:"allowed_kinds"`
 	} `json:"moderated"`
 }
 
@@ -149,6 +156,28 @@ func (rm RelayMetadata) IsIconDefault() bool {
 	return rm.Icon == ""
 }
 
+// GetAllowedKinds returns per-relay kinds if set, otherwise falls back to global
+func GetAllowedKinds(perRelay []nostr.Kind) []nostr.Kind {
+	if len(perRelay) > 0 {
+		return perRelay
+	}
+	return Settings.AllowedKinds
+}
+
+// RejectEventIfKindNotAllowed returns a khatru-compatible policy function
+// that checks if the event kind is in the allowed list (per-relay or global fallback)
+func RejectEventIfKindNotAllowed(getPerRelay func() []nostr.Kind) func(ctx context.Context, evt nostr.Event) (bool, string) {
+	return func(ctx context.Context, evt nostr.Event) (bool, string) {
+		allowed := GetAllowedKinds(getPerRelay())
+		for _, k := range allowed {
+			if evt.Kind == k {
+				return false, ""
+			}
+		}
+		return true, "blocked: event kind not allowed"
+	}
+}
+
 func (us UserSettings) HTTPScheme() string {
 	if strings.HasPrefix(us.Domain, "127.0.0.1") || strings.HasPrefix(us.Domain, "0.0.0.0") || strings.HasPrefix(us.Domain, "localhost") {
 		return "http://"
@@ -195,7 +224,16 @@ func loadUserSettings() error {
 	Settings.Internal.Enabled = true
 	Settings.Favorites.Enabled = true
 	Settings.Inbox.HellthreadLimit = 10
-	Settings.Inbox.AllowedKinds = []nostr.Kind{1, 11, 20, 21, 22, 1111, 1222, 1244, 9321, 9735, 9802, 30023, 30040, 30818}
+	// global default allowed kinds (used by all relays unless overridden)
+	Settings.AllowedKinds = []nostr.Kind{
+		0, 1, 3, 5, 6, 7, 8, 9, 11, 16, 20, 21, 22, 24,
+		818, 1040, 1063, 1111, 1984, 1985,
+		7375, 7376, 9321, 9735, 9802,
+		10000, 10001, 10002, 10003, 10004, 10005, 10006, 10007, 10009, 10015, 10019, 10030, 10050, 10101, 10102,
+		17375, 24133,
+		30000, 30002, 30003, 30004, 30008, 30009, 30015, 30023, 30030, 30040, 30041, 30078, 30311, 30617, 30618, 30818, 30819,
+		31922, 31923, 31924, 31925, 39701,
+	}
 	Settings.Popular.PercentThreshold = 20
 	Settings.Uppermost.PercentThreshold = 33
 	Settings.Internal.HTTPBasePath = "internal"

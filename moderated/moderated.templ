@@ -2,6 +2,7 @@ package moderated
 
 import (
 	"fmt"
+	"strings"
 
 	"fiatjaf.com/nostr"
 
@@ -31,6 +32,13 @@ templ moderatedPage(loggedUser nostr.PubKey) {
 						browse moderated →
 					</a>
 				}
+				{{
+					allowedKindsStrs := make([]string, len(global.Settings.Moderated.AllowedKinds))
+					for i, k := range global.Settings.Moderated.AllowedKinds {
+						allowedKindsStrs[i] = fmt.Sprint(int(k))
+					}
+					allowedKindsStr := strings.Join(allowedKindsStrs, ", ")
+				}}
 				if pyramid.IsRoot(loggedUser) {
 					@layout.SubRelaySettings("moderated", global.Settings.Moderated.Enabled, global.Settings.Moderated.Name, global.Settings.Moderated.Description, global.Settings.Moderated.Icon, global.Settings.Moderated.HTTPBasePath) {
 						<details>
@@ -40,6 +48,7 @@ templ moderatedPage(loggedUser nostr.PubKey) {
 								action="/settings"
 								x-data={ `{
 								moderatedMinPoW: ` + fmt.Sprint(global.Settings.Moderated.MinPoW) + `,
+								allowedKinds: '` + allowedKindsStr + `',
 								saved: false,
 								async saveSettings() {
 									const response = await fetch(this.$refs.form.action, {
@@ -64,6 +73,17 @@ templ moderatedPage(loggedUser nostr.PubKey) {
 										max="32"
 										class="w-full px-4 py-2 rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 dark:text-stone-100 mb-4"
 										x-model="moderatedMinPoW"
+										@blur="saveSettings()"
+									/>
+								</div>
+								<div>
+									<label class="block text-sm font-medium mb-2 dark:text-stone-300">allowed event kinds (comma-separated, leave empty for global default)</label>
+									<input
+										type="text"
+										name="moderated_allowed_kinds"
+										placeholder="1, 30023, 30040, ..."
+										class="w-full px-4 py-2 rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 dark:text-stone-100 mb-4"
+										x-model="allowedKinds"
 										@blur="saveSettings()"
 									/>
 								</div>

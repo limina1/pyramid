@@ -140,7 +140,7 @@ templ inboxPage(loggedUser nostr.PubKey) {
 
 					allowedKindsStrs := make([]string, len(global.Settings.Inbox.AllowedKinds))
 					for i, k := range global.Settings.Inbox.AllowedKinds {
-						allowedKindsStrs[i] = fmt.Sprint(k)
+						allowedKindsStrs[i] = fmt.Sprint(int(k))
 					}
 					allowedKindsStr := strings.Join(allowedKindsStrs, ", ")
 				}}

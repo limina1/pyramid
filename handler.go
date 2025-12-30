@@ -111,6 +111,20 @@ func settingsHandler(w http.ResponseWriter, r *http.Request) {
 				global.Settings.LinkURL = v[0]
 			case "require_current_timestamp":
 				global.Settings.RequireCurrentTimestamp = v[0] == "on"
+			case "allowed_kinds":
+				var kinds []nostr.Kind
+				for _, s := range strings.Split(v[0], ",") {
+					s = strings.TrimSpace(s)
+					if s == "" {
+						continue
+					}
+					if kind, err := strconv.Atoi(s); err == nil {
+						kinds = append(kinds, nostr.Kind(kind))
+					}
+				}
+				if len(kinds) > 0 {
+					global.Settings.AllowedKinds = kinds
+				}
 			case "paywall_tag":
 				global.Settings.Paywall.Tag = v[0]
 			case "paywall_amount":
@@ -261,6 +275,42 @@ func settingsHandler(w http.ResponseWriter, r *http.Request) {
 				if len(kinds) > 0 {
 					global.Settings.Inbox.AllowedKinds = kinds
 				}
+			case "favorites_allowed_kinds":
+				var kinds []nostr.Kind
+				for _, s := range strings.Split(v[0], ",") {
+					s = strings.TrimSpace(s)
+					if s == "" {
+						continue
+					}
+					if kind, err := strconv.Atoi(s); err == nil {
+						kinds = append(kinds, nostr.Kind(kind))
+					}
+				}
+				global.Settings.Favorites.AllowedKinds = kinds
+			case "internal_allowed_kinds":
+				var kinds []nostr.Kind
+				for _, s := range strings.Split(v[0], ",") {
+					s = strings.TrimSpace(s)
+					if s == "" {
+						continue
+					}
+					if kind, err := strconv.Atoi(s); err == nil {
+						kinds = append(kinds, nostr.Kind(kind))
+					}
+				}
+				global.Settings.Internal.AllowedKinds = kinds
+			case "moderated_allowed_kinds":
+				var kinds []nostr.Kind
+				for _, s := range strings.Split(v[0], ",") {
+					s = strings.TrimSpace(s)
+					if s == "" {
+						continue
+					}
+					if kind, err := strconv.Atoi(s); err == nil {
+						kinds = append(kinds, nostr.Kind(kind))
+					}
+				}
+				global.Settings.Moderated.AllowedKinds = kinds
 				//
 				// popular-specific
 			case "popular_percent_threshold":

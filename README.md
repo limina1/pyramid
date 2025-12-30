@@ -7,8 +7,10 @@
 type this in a blank server you just rented:
 
 ```
-curl -s https://raw.githubusercontent.com/fiatjaf/pyramid/refs/heads/master/easy.sh | bash
+curl -s https://raw.githubusercontent.com/limina1/pyramid/refs/heads/master/easy.sh | bash
 ```
+
+> **Note:** This fork includes additional features like configurable allowed event kinds. See [fork changes](#fork-changes) below.
 
 or watch [this](https://fevela.me/nevent1qvzqqqqqqypzqwlsccluhy6xxsr6l9a9uhhxf75g85g8a709tprjcn4e42h053vaqyd8wumn8ghj7urewfsk66ty9enxjct5dfskvtnrdakj7qgmwaehxw309aex2mrp0yh8wetnw3jhymnzw33jucm0d5hsqgzz6ft7cfafp3dw29cyewc4cqhv59cxn392vesfexg0szv73gl06czvu37k) instructive video:
 
@@ -101,3 +103,30 @@ https://github.com/user-attachments/assets/3eafa97c-a7a9-4fdc-b1ea-f466dae47634
 ## community
 
 join the group of users at `pyramid.fiatjaf.com'Tnq7x2ZTgrPZWFrC` ([chachi](https://chachi.chat/pyramid.fiatjaf.com/Tnq7x2ZTgrPZWFrC)) to talk about your experience or complain about things.
+
+## fork changes
+
+This fork ([limina1/pyramid](https://github.com/limina1/pyramid)) includes the following additions:
+
+### configurable allowed event kinds
+
+All relays now support configurable event kinds instead of hardcoded lists:
+
+- **Global allowed kinds**: Set default allowed kinds for all relays in the main settings
+- **Per-relay allowed kinds**: Override the global setting for specific relays (inbox, favorites, internal, moderated)
+- **UI configuration**: Edit allowed kinds through the web interface (inbox relay → filters → "allowed event kinds")
+- **Includes wiki kinds**: 30040 (wiki collection) and 30041 (wiki page) are enabled by default
+
+The allowed kinds are stored in `settings.json` and persist across restarts. If a per-relay setting is empty, it falls back to the global setting.
+
+#### common event kinds reference
+
+| Kind | Description |
+|------|-------------|
+| 1 | Short text note |
+| 11 | Thread |
+| 30023 | Long-form article |
+| 30040 | Wiki collection (modular article header) |
+| 30041 | Wiki page |
+| 30818 | Wiki article |
+| 9735 | Zap receipt |

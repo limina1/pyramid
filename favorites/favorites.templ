@@ -1,6 +1,9 @@
 package favorites
 
 import (
+	"fmt"
+	"strings"
+
 	"fiatjaf.com/nostr"
 
 	"github.com/fiatjaf/pyramid/global"
@@ -29,8 +32,57 @@ templ favoritesPage(loggedUser nostr.PubKey) {
 						browse favorites →
 					</a>
 				}
+				{{
+					allowedKindsStrs := make([]string, len(global.Settings.Favorites.AllowedKinds))
+					for i, k := range global.Settings.Favorites.AllowedKinds {
+						allowedKindsStrs[i] = fmt.Sprint(int(k))
+					}
+					allowedKindsStr := strings.Join(allowedKindsStrs, ", ")
+				}}
 				if pyramid.IsRoot(loggedUser) {
-					@layout.SubRelaySettings("favorites", global.Settings.Favorites.Enabled, global.Settings.Favorites.Name, global.Settings.Favorites.Description, global.Settings.Favorites.Icon, global.Settings.Favorites.HTTPBasePath)
+					@layout.SubRelaySettings("favorites", global.Settings.Favorites.Enabled, global.Settings.Favorites.Name, global.Settings.Favorites.Description, global.Settings.Favorites.Icon, global.Settings.Favorites.HTTPBasePath) {
+						<details>
+							<summary class="mb-4 cursor-pointer text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200">filters</summary>
+							<form
+								method="POST"
+								action="/settings"
+								x-data={ `{
+									allowedKinds: '` + allowedKindsStr + `',
+									saved: false,
+									async saveSettings() {
+										const response = await fetch(this.$refs.form.action, {
+											method: 'POST',
+											body: new URLSearchParams(new FormData(this.$refs.form))
+										})
+										if (response.ok) {
+											this.saved = true;
+											setTimeout(() => this.saved = false, 2000)
+										}
+									}
+								}` }
+								x-ref="form"
+							>
+								<div>
+									<label class="block text-sm font-medium mb-2 dark:text-stone-300">allowed event kinds (comma-separated, leave empty for global default)</label>
+									<input
+										type="text"
+										name="favorites_allowed_kinds"
+										placeholder="1, 30023, 30040, ..."
+										class="w-full px-4 py-2 rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 dark:text-stone-100 mb-4"
+										x-model="allowedKinds"
+										@blur="saveSettings()"
+									/>
+								</div>
+								<div
+									x-show="saved"
+									x-transition
+									class="text-sm text-green-600 dark:text-green-400 font-medium mb-4"
+								>
+									saved!
+								</div>
+							</form>
+						</details>
+					}
 				}
 			</div>
 		</div>

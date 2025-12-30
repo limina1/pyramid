@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"fiatjaf.com/nostr"
 
@@ -385,6 +386,62 @@ templ settingsPage(loggedUser nostr.PubKey) {
 								njump.to
 							</button>
 						</div>
+					</div>
+				</div>
+				<div
+					x-show="saved"
+					x-transition
+					class="text-sm text-green-600 dark:text-green-400 font-medium"
+				>
+					saved!
+				</div>
+			</form>
+			<!-- Global Allowed Kinds Section -->
+			{{
+				globalKindsStrs := make([]string, len(global.Settings.AllowedKinds))
+				for i, k := range global.Settings.AllowedKinds {
+					globalKindsStrs[i] = fmt.Sprint(int(k))
+				}
+				globalKindsStr := strings.Join(globalKindsStrs, ", ")
+			}}
+			<form
+				method="POST"
+				action="/settings"
+				class="space-y-6 mt-8"
+				x-data={ `{
+					allowedKinds: '` + globalKindsStr + `',
+					saved: false,
+					async saveSettings() {
+						const response = await fetch(this.$refs.form.action, {
+							method: 'POST',
+							body: new URLSearchParams(new FormData(this.$refs.form))
+						})
+						if (response.ok) {
+							this.saved = true;
+							setTimeout(() => this.saved = false, 2000)
+						}
+					}
+				}` }
+				x-ref="form"
+			>
+				@layout.SubSectionTitle("allowed event kinds")
+				<div class="space-y-4">
+					<div>
+						<label class="block text-sm font-medium mb-2 dark:text-stone-300">global allowed kinds (comma-separated)</label>
+						<input
+							type="text"
+							name="allowed_kinds"
+							placeholder="1, 11, 30023, 30040, ..."
+							class="w-full px-4 py-2 rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 dark:text-stone-100"
+							x-model="allowedKinds"
+							@blur="saveSettings()"
+						/>
+						<p class="mt-1 text-xs text-stone-500 dark:text-stone-400">
+							these kinds are allowed by default for all relays. per-relay settings can override this.
+						</p>
+						<p class="mt-1 text-xs text-stone-500 dark:text-stone-400">
+							common: 1 (note), 11 (thread), 30023 (article), 30040 (wiki collection), 30041 (wiki page), 30818 (wiki)
+						</p>
 					</div>
 				</div>
 				<div
