@@ -68,6 +68,7 @@ type UserSettings struct {
 		SpecificallyBlocked []nostr.PubKey `json:"specifically_blocked"`
 		HellthreadLimit     int            `json:"hellthread_limit"`
 		MinDMPoW            int            `json:"min_dm_pow"`
+		AllowedKinds        []nostr.Kind   `json:"allowed_kinds"`
 	} `json:"inbox"`
 
 	Groups struct {
@@ -194,6 +195,7 @@ func loadUserSettings() error {
 	Settings.Internal.Enabled = true
 	Settings.Favorites.Enabled = true
 	Settings.Inbox.HellthreadLimit = 10
+	Settings.Inbox.AllowedKinds = []nostr.Kind{1, 11, 20, 21, 22, 1111, 1222, 1244, 9321, 9735, 9802, 30023, 30040, 30818}
 	Settings.Popular.PercentThreshold = 20
 	Settings.Uppermost.PercentThreshold = 33
 	Settings.Internal.HTTPBasePath = "internal"

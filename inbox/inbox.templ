@@ -137,6 +137,12 @@ templ inboxPage(loggedUser nostr.PubKey) {
 						quoted = append(quoted, fmt.Sprintf("'%s'", b))
 					}
 					quoted = append(quoted, "\"\"")
+
+					allowedKindsStrs := make([]string, len(global.Settings.Inbox.AllowedKinds))
+					for i, k := range global.Settings.Inbox.AllowedKinds {
+						allowedKindsStrs[i] = fmt.Sprint(k)
+					}
+					allowedKindsStr := strings.Join(allowedKindsStrs, ", ")
 				}}
 				if pyramid.IsRoot(loggedUser) {
 					@layout.SubRelaySettings("inbox", global.Settings.Inbox.Enabled, global.Settings.Inbox.Name, global.Settings.Inbox.Description, global.Settings.Inbox.Icon, global.Settings.Inbox.HTTPBasePath) {
@@ -149,6 +155,7 @@ templ inboxPage(loggedUser nostr.PubKey) {
 								hellthreadLimit: ` + fmt.Sprint(global.Settings.Inbox.HellthreadLimit) + `,
 								minDMPoW: ` + fmt.Sprint(global.Settings.Inbox.MinDMPoW) + `,
 								blocked: [` + strings.Join(quoted, ",") + `],
+								allowedKinds: '` + allowedKindsStr + `',
 								saved: false,
 								async saveSettings() {
 									const response = await fetch(this.$refs.form.action, {
@@ -204,6 +211,18 @@ templ inboxPage(loggedUser nostr.PubKey) {
 											</div>
 										</template>
 									</div>
+								</div>
+								<div>
+									<label class="block text-sm font-medium mb-2 dark:text-stone-300">allowed event kinds (comma-separated)</label>
+									<input
+										type="text"
+										name="inbox_allowed_kinds"
+										placeholder="1, 30023, 30040, ..."
+										class="w-full px-4 py-2 rounded border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-700 dark:text-stone-100 mb-4"
+										x-model="allowedKinds"
+										@blur="saveSettings()"
+									/>
+									<p class="text-xs text-stone-500 dark:text-stone-400 mb-4">common kinds: 1 (note), 11 (thread), 30023 (article), 30040 (wiki collection), 30818 (wiki page)</p>
 								</div>
 								<div
 									x-show="saved"

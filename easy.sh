@@ -5,7 +5,7 @@ ufw allow http
 ufw allow https
 
 # download binary into ./pyramid directory
-VERSION=$(curl -s "https://api.github.com/repos/fiatjaf/pyramid/releases/latest" | grep '"tag_name":' | cut -d '"' -f 4)
+VERSION=$(curl -s "https://api.github.com/repos/limina1/pyramid/releases/latest" | grep '"tag_name":' | cut -d '"' -f 4)
 case $(uname -m) in
   x86_64)
     ARCH="amd64"
@@ -22,7 +22,7 @@ mkdir -p pyramid
 cd pyramid
 rm pyramid-old
 mv pyramid pyramid-old 2>/dev/null || true
-wget "https://github.com/fiatjaf/pyramid/releases/download/$VERSION/pyramid-$ARCH"
+wget "https://github.com/limina1/pyramid/releases/download/$VERSION/pyramid-$ARCH"
 mv "pyramid-$ARCH" pyramid
 chmod +x pyramid
 DIR=$(pwd)
